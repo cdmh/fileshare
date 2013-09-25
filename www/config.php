@@ -1,0 +1,1 @@
+<?php$pyfli_internal = 'http://localhost:8181';$pyfli_external = 'http://localhost:8181';?>
