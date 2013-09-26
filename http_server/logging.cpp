@@ -2,8 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <list>
-#include <windows.h>
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include <boost/thread/mutex.hpp>
 #include <boost/filesystem.hpp>
 #include "logging.h"
@@ -19,7 +18,7 @@ struct logging::Data
     boost::mutex            lock_;
     std::list<std::string>  lines_;
     unsigned                line_count_;
-    boost::thread          *thread_;
+    std::unique_ptr<std::thread> thread_;
     bool                    log_to_console_;
 
     static unsigned const max_lines = 2500000;
@@ -33,7 +32,7 @@ logging::logging(char const *path)
     data->log_to_console_ = false;
 
     this->new_file();
-    data->thread_ = new boost::thread(boost::bind(&logging::flusher, this));
+    data->thread_.reset(new std::thread(std::bind(&logging::flusher, this)));
 }
 
 logging::~logging()
