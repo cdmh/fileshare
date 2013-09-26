@@ -9,7 +9,7 @@
 //
 
 #include "server.hpp"
-#include <boost/thread.hpp>
+#include <thread>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -41,17 +41,16 @@ server::server(const std::string& address, const std::string& port,
 void server::run()
 {
   // Create a pool of threads to run all of the io_services.
-  std::vector<std::shared_ptr<boost::thread> > threads;
+  std::vector<std::shared_ptr<std::thread> > threads;
   for (std::size_t i = 0; i < thread_pool_size_; ++i)
   {
-    std::shared_ptr<boost::thread> thread(new boost::thread(
-          boost::bind(&boost::asio::io_service::run, &io_service_)));
+    std::shared_ptr<std::thread> thread(new std::thread([this](){ io_service_.run(); }));
     threads.push_back(thread);
   }
 
   // Wait for all threads in the pool to exit.
-  for (std::size_t i = 0; i < threads.size(); ++i)
-    threads[i]->join();
+  for (auto thread : threads)
+    thread->join();
 }
 
 void server::stop()
