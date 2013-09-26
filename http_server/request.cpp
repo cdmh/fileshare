@@ -1,5 +1,6 @@
 #include <boost/filesystem.hpp>
 #include "request.hpp"
+#include "platform.h"
 
 namespace fileshare {
 std::string const store_file_details(std::string     const &mime_type,
@@ -17,16 +18,13 @@ namespace http {
 
 namespace server3 {
 
-file_store::file_store() : store_(INVALID_HANDLE_VALUE), buffer_position_(0)
+file_store::file_store()
+  : filename_(cdmh::get_temporary_filename()),
+    store_(INVALID_HANDLE_VALUE),
+    buffer_position_(0)
 {
-#ifdef _WIN32
-    strcpy(filename_, "./uploads");
-    GetTempFileNameA(filename_, "pf_", 0, filename_);
-
-    store_ = CreateFileA(filename_, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-#else
-#error unsupported platform
-#endif
+    store_ = CreateFileA(filename_.c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    LOG_MEM << "File store created: " << filename_;
 }
 
 file_store::~file_store()
@@ -37,6 +35,7 @@ file_store::~file_store()
         CloseHandle(store_);
     }
     store_ = 0;
+    filename_.clear();
 }
 
 void file_store::operator()(char const ch)
@@ -186,8 +185,6 @@ void request::on_form_data(void)
             filename_,
 #ifdef _DEBUG
             "http://localhost:8089/?dl="+id_,
-#elif CENTRIX_SOFTWARE
-            "http://195.224.113.203/?dl="+id_,
 #else
             "http://pyf.li:8089/?dl="+id_,
 #endif
@@ -212,7 +209,7 @@ bool const request::is_valid_request(std::string const &id)
     return (it != requests_.end());
 }
 
-bool const request::get_request(std::string const &id, boost::shared_ptr<request> &req)
+bool const request::get_request(std::string const &id, std::shared_ptr<request> &req)
 {
     boost::mutex::scoped_lock lock(requests_lock_);
     requests_t::const_iterator it = requests_.find(id);
@@ -223,7 +220,7 @@ bool const request::get_request(std::string const &id, boost::shared_ptr<request
     return true;
 }
 
-bool const request::add_request(std::string const &id, boost::shared_ptr<request> const &req)
+bool const request::add_request(std::string const &id, std::shared_ptr<request> const &req)
 {
     boost::mutex::scoped_lock lock(requests_lock_);
     requests_t::const_iterator it = requests_.find(id);

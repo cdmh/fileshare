@@ -25,7 +25,7 @@ void request_parser::reset()
   state_ = method_start;
 }
 
-boost::tribool request_parser::consume(boost::shared_ptr<request> const &req, char const &input)
+boost::tribool request_parser::consume(std::shared_ptr<request> const &req, char const &input)
 {
   req->increment_offset();
   switch (state_)

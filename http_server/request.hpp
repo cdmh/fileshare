@@ -29,17 +29,17 @@ class file_store
     void flush(void);
     void operator()(char const ch);
 
-    std::string    const filename(void) const   { return filename_; }
+    std::string     filename(void) const   { return filename_; }
 
   private:
-    char            filename_[_MAX_PATH+1];
+    std::string     filename_;
     char            buffer_[1024*500];
     unsigned        buffer_position_;
     HANDLE          store_;
 };
 
 /// A request received from a client.
-struct request : public boost::enable_shared_from_this<request>
+struct request : public std::enable_shared_from_this<request>
 {
     request()
       : content_length(0),
@@ -109,11 +109,11 @@ struct request : public boost::enable_shared_from_this<request>
     boost::uint64_t content_length;
     boost::uint64_t content_transferred_so_far;
 
-    typedef std::map<std::string, boost::shared_ptr<request> > requests_t;
-    static bool const add_request(std::string const &id, boost::shared_ptr<request> const &req);
+    typedef std::map<std::string, std::shared_ptr<request> > requests_t;
+    static bool const add_request(std::string const &id, std::shared_ptr<request> const &req);
     static bool const clear_requests(void);
     static bool const delete_request(std::string const &id);
-    static bool const get_request(std::string const &id, boost::shared_ptr<request> &req);
+    static bool const get_request(std::string const &id, std::shared_ptr<request> &req);
     static bool const is_valid_request(std::string const &id);
 
   private:

@@ -50,7 +50,7 @@ typedef std::vector<header> headers_t;
 class connection;
 
 typedef
-boost::function<bool const (headers_t const &, std::string const &, headers_t &, std::string &, boost::shared_ptr<connection> const &)>
+boost::function<bool const (headers_t const &, std::string const &, headers_t &, std::string &, std::shared_ptr<connection> const &)>
 http_query_callback;
 
 } // namespace server3

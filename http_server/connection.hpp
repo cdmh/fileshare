@@ -12,10 +12,7 @@
 #define HTTP_SERVER3_CONNECTION_HPP
 
 #include <boost/asio.hpp>
-#include <boost/array.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/timer.hpp>
 #include "reply.hpp"
 #include "request.hpp"
@@ -27,7 +24,7 @@ namespace server3 {
 
 /// Represents a single connection from a client.
 class connection
-  : public boost::enable_shared_from_this<connection>,
+  : public std::enable_shared_from_this<connection>,
     private boost::noncopyable
 {
   public:
@@ -70,10 +67,10 @@ class connection
     request_handler& request_handler_;
 
     /// Buffer for incoming data.
-    boost::array<char, 1024*1024> buffer_;
+    std::array<char, 1024*1024> buffer_;
 
     /// The incoming request.
-    boost::shared_ptr<request> request_;
+    std::shared_ptr<request> request_;
 
     /// The parser for the incoming request.
     request_parser request_parser_;
@@ -87,7 +84,7 @@ class connection
     boost::timer timer_;
 };
 
-typedef boost::shared_ptr<connection> connection_ptr;
+typedef std::shared_ptr<connection> connection_ptr;
 
 } // namespace server3
 } // namespace http

@@ -16,3 +16,4 @@ bin/Debug/*
 bin/Release/*
 *.user
 www/centrix/*
+*.suo

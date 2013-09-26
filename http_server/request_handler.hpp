@@ -32,7 +32,7 @@ public:
   request_handler(const std::string& doc_root, http_query_callback http_query);
 
   /// Handle a request and produce a reply.
-  void handle_request(boost::shared_ptr<request> const &req, reply &rep, boost::shared_ptr<connection> const &conn);
+  void handle_request(std::shared_ptr<request> const &req, reply &rep, std::shared_ptr<connection> const &conn);
 
 private:
   /// The directory containing the files to be served.

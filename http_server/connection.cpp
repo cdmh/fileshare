@@ -50,11 +50,11 @@ void connection::start()
                 boost::asio::placeholders::bytes_transferred)));
 }
 
-void connection::handle_read_post(const boost::system::error_code& e, std::size_t bytes_transferred)
+void connection::handle_read_post(boost::system::error_code const &e, std::size_t bytes_transferred)
 {
     boost::tribool result;
-    boost::tie(result, boost::tuples::ignore) = request_parser_.parse(
-        request_, buffer_.data(), buffer_.data() + bytes_transferred);
+    std::tie(result, std::ignore) = request_parser_.parse(
+        request_, begin(buffer_), begin(buffer_) + bytes_transferred);
 
     request_->content_transferred_so_far += bytes_transferred;
 
@@ -110,117 +110,121 @@ void connection::handle_read_post(const boost::system::error_code& e, std::size_
     // handler returns. The connection class's destructor closes the socket.
 }
 
-void connection::handle_read(const boost::system::error_code& e,
+void connection::handle_read(
+    boost::system::error_code const &e,
     std::size_t bytes_transferred)
 {
-  if (e)
-  {
-    LOG_MEM << "*** Error " << e.value() << " @ " << __FILE__ << " (" << __LINE__ << "):  " <<  e.message();
-      socket_.async_read_some(boost::asio::buffer(buffer_),
-          strand_.wrap(
-            boost::bind(&connection::handle_read, shared_from_this(),
-              boost::asio::placeholders::error,
-              boost::asio::placeholders::bytes_transferred)));
-  }
-  else
-  {
-    boost::tribool result;
-    boost::tie(result, boost::tuples::ignore) = request_parser_.parse(
-        request_, buffer_.data(), buffer_.data() + bytes_transferred);
-
-    if (result)
+    if (e)
     {
-        LOG_MEM << "Method\t" << request_->method;
-        if (stricmp(request_->method.c_str(), "POST") == 0)
+        LOG_MEM << "*** Error " << e.value() << " @ " << __FILE__ << " (" << __LINE__ << "):  " <<  e.message();
+        if (e.value() != 2) // end of file
         {
-            request_->content_transferred_so_far = 0;
-            request_->boundary_marker.clear();
-
-            for (http::server3::headers_t::const_iterator it=request_->headers.begin(); it!=request_->headers.end(); ++it)
-            {
-                if (stricmp(it->name.c_str(), "Content-Length") == 0)
-                    request_->content_length = boost::lexical_cast<boost::uint64_t>(it->value);
-                else if (strnicmp(it->name.c_str(), "Content-Type", 12) == 0)
-                {
-                    // skip "multipart/form-data; boundary="
-                    assert(it->value.length() > 30);
-                    request_->boundary_marker = "\r\n--";
-                    request_->boundary_marker += &it->value[30];
-                    request_->boundary_marker += "\r\n";
-                }
-            }
-            LOG_MEM << "Post File: " << request_->content_length << " bytes";
-
-            if (request_->offset() == bytes_transferred)
-            {
-                socket_.async_read_some(boost::asio::buffer(buffer_),
-                  strand_.wrap(
-                    boost::bind(&connection::handle_read_post, shared_from_this(),
-                      boost::asio::placeholders::error,
-                      boost::asio::placeholders::bytes_transferred)));
-            }
-            else
-            {
-                boost::uint64_t dest = 0;
-                for (boost::uint64_t src=request_->offset(); src<bytes_transferred; ++src, ++dest)
-                    buffer_[dest] = buffer_[src];
-                handle_read_post(e, bytes_transferred - request_->offset());
-            }
+            socket_.async_read_some(boost::asio::buffer(buffer_),
+                strand_.wrap(
+                boost::bind(&connection::handle_read, shared_from_this(),
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred)));
         }
-#ifndef NDEBUG
-        else if (stricmp(request_->method.c_str(), "OPTIONS") == 0)
-        {
-            for (http::server3::headers_t::const_iterator it=request_->headers.begin(); it!=request_->headers.end(); ++it)
-            {
-                if (stricmp(it->name.c_str(), "Access-Control-Request-Method") == 0)
-                    if (stricmp(it->value.c_str(), "POST") == 0)
-                    {
-                        reply_ = reply::stock_reply(reply::ok);
-                        reply_.headers.clear();
-                        reply_.headers.push_back(headers_t::value_type("Access-Control-Allow-Origin","*"));
-                        reply_.headers.push_back(headers_t::value_type("Access-Control-Allow-Methods","POST"));
-                        reply_.headers.push_back(headers_t::value_type("Access-Control-Request-Headers","UP-TYPE, UP-FILENAME, UP-SIZE, Content-Type"));
-
-                        sync_send_data_buffer(reply_.to_buffers());
-                        socket_.async_read_some(boost::asio::buffer(buffer_),
-                            strand_.wrap(
-                                boost::bind(&connection::handle_read, shared_from_this(),
-                                    boost::asio::placeholders::error,
-                                    boost::asio::placeholders::bytes_transferred)));
-                        break;
-                    }
-            }
-        }
-#endif
-        else
-        {
-            request_handler_.handle_request(request_, reply_, shared_from_this());
-            if (reply_.content.size() > 0 && reply_.headers.size() > 0)
-            {
-                boost::asio::async_write(socket_, reply_.to_buffers(),
-                    strand_.wrap(
-                        boost::bind(&connection::handle_write, shared_from_this(),
-                        boost::asio::placeholders::error)));
-            }
-        }
-    }
-    else if (!result)
-    {
-      reply_ = reply::stock_reply(reply::bad_request);
-      boost::asio::async_write(socket_, reply_.to_buffers(),
-          strand_.wrap(
-            boost::bind(&connection::handle_write, shared_from_this(),
-              boost::asio::placeholders::error)));
     }
     else
     {
-      socket_.async_read_some(boost::asio::buffer(buffer_),
-          strand_.wrap(
-            boost::bind(&connection::handle_read, shared_from_this(),
-              boost::asio::placeholders::error,
-              boost::asio::placeholders::bytes_transferred)));
+        boost::tribool result;
+        std::tie(result, std::ignore) = request_parser_.parse(
+            request_, buffer_.data(), buffer_.data() + bytes_transferred);
+
+        if (result)
+        {
+            LOG_MEM << "Method\t" << request_->method;
+            if (stricmp(request_->method.c_str(), "POST") == 0)
+            {
+                request_->content_transferred_so_far = 0;
+                request_->boundary_marker.clear();
+
+                for (auto it=request_->headers.begin(); it!=request_->headers.end(); ++it)
+                {
+                    if (stricmp(it->name.c_str(), "Content-Length") == 0)
+                        request_->content_length = boost::lexical_cast<boost::uint64_t>(it->value);
+                    else if (strnicmp(it->name.c_str(), "Content-Type", 12) == 0)
+                    {
+                        // skip "multipart/form-data; boundary="
+                        assert(it->value.length() > 30);
+                        request_->boundary_marker = "\r\n--";
+                        request_->boundary_marker += &it->value[30];
+                        request_->boundary_marker += "\r\n";
+                    }
+                }
+                LOG_MEM << "Post File: " << request_->content_length << " bytes";
+
+                if (request_->offset() == bytes_transferred)
+                {
+                    socket_.async_read_some(boost::asio::buffer(buffer_),
+                        strand_.wrap(
+                        boost::bind(&connection::handle_read_post, shared_from_this(),
+                            boost::asio::placeholders::error,
+                            boost::asio::placeholders::bytes_transferred)));
+                }
+                else
+                {
+                    boost::uint64_t dest = 0;
+                    for (boost::uint64_t src=request_->offset(); src<bytes_transferred; ++src, ++dest)
+                        buffer_[dest] = buffer_[src];
+                    handle_read_post(e, bytes_transferred - request_->offset());
+                }
+            }
+#ifndef NDEBUG      // !!! this isn't fully implemented (aka working!)
+            else if (stricmp(request_->method.c_str(), "OPTIONS") == 0)
+            {
+                for (http::server3::headers_t::const_iterator it=request_->headers.begin(); it!=request_->headers.end(); ++it)
+                {
+                    if (stricmp(it->name.c_str(), "Access-Control-Request-Method") == 0)
+                        if (stricmp(it->value.c_str(), "POST") == 0)
+                        {
+                            reply_ = reply::stock_reply(reply::ok);
+                            reply_.headers.clear();
+                            reply_.headers.push_back(headers_t::value_type("Access-Control-Allow-Origin","*"));
+                            reply_.headers.push_back(headers_t::value_type("Access-Control-Allow-Methods","POST"));
+                            reply_.headers.push_back(headers_t::value_type("Access-Control-Request-Headers","UP-TYPE, UP-FILENAME, UP-SIZE, Content-Type"));
+
+                            sync_send_data_buffer(reply_.to_buffers());
+                            socket_.async_read_some(boost::asio::buffer(buffer_),
+                                strand_.wrap(
+                                    boost::bind(&connection::handle_read, shared_from_this(),
+                                        boost::asio::placeholders::error,
+                                        boost::asio::placeholders::bytes_transferred)));
+                            break;
+                        }
+                }
+            }
+#endif
+            else
+            {
+                request_handler_.handle_request(request_, reply_, shared_from_this());
+                if (reply_.content.size() > 0 && reply_.headers.size() > 0)
+                {
+                    boost::asio::async_write(socket_, reply_.to_buffers(),
+                        strand_.wrap(
+                            boost::bind(&connection::handle_write, shared_from_this(),
+                            boost::asio::placeholders::error)));
+                }
+            }
+        }
+        else if (!result)
+        {
+            reply_ = reply::stock_reply(reply::bad_request);
+            boost::asio::async_write(socket_, reply_.to_buffers(),
+                strand_.wrap(
+                boost::bind(&connection::handle_write, shared_from_this(),
+                    boost::asio::placeholders::error)));
+        }
+        else
+        {
+            socket_.async_read_some(boost::asio::buffer(buffer_),
+                strand_.wrap(
+                boost::bind(&connection::handle_read, shared_from_this(),
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred)));
+        }
     }
-  }
 
   // If an error occurs then no new asynchronous operations are started. This
   // means that all shared_ptr references to the connection object will
@@ -228,7 +232,7 @@ void connection::handle_read(const boost::system::error_code& e,
   // handler returns. The connection class's destructor closes the socket.
 }
 
-void connection::handle_write(const boost::system::error_code& e)
+void connection::handle_write(boost::system::error_code const &e)
 {
     if (e)
         LOG_MEM << "*** Error " << e.value() << " @ " << __FILE__ << " (" << __LINE__ << "):  " <<  e.message();

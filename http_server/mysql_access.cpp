@@ -274,8 +274,6 @@ std::string const store_file_details(std::string     const &mime_type,
 
 #ifdef _DEBUG
     mysql ms("localhost", "pyfli", "pyfli", "PYFl1");
-#elif CENTRIX_SOFTWARE
-    mysql ms("localhost", "pyfli", "pyfli", "M00nshine");
 #else
     //mysql ms("213.171.200.51", "whereilive", "whereilive", "3v3ex1201");
     mysql ms("localhost", "pyfli", "pyfli", "pyf.li");
@@ -285,8 +283,6 @@ std::string const store_file_details(std::string     const &mime_type,
     {
 #ifdef _DEBUG
         std::string url(" http://localhost/"+link);
-#elif CENTRIX_SOFTWARE
-        std::string url(" http://195.224.113.203/"+link);
 #else
         std::string url(" http://pyf.li/"+link);
 #endif
@@ -340,8 +336,6 @@ bool const on_upload_complete(std::string const &link)
 {
 #ifdef _DEBUG
     mysql ms("localhost", "pyfli", "pyfli", "PYFl1");
-#elif CENTRIX_SOFTWARE
-    mysql ms("localhost", "pyfli", "pyfli", "M00nshine");
 #else
     mysql ms("213.171.200.51", "whereilive", "whereilive", "3v3ex1201");
 #endif
@@ -370,8 +364,6 @@ bool const delete_download(std::string const &link)
 {
 #ifdef _DEBUG
     mysql ms("localhost", "pyfli", "pyfli", "PYFl1");
-#elif CENTRIX_SOFTWARE
-    mysql ms("localhost", "pyfli", "pyfli", "M00nshine");
 #else
     mysql ms("213.171.200.51", "whereilive", "whereilive", "3v3ex1201");
 #endif

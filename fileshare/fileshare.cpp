@@ -81,10 +81,8 @@ class http_query_server : boost::noncopyable
         std::string              const &query_string,
         http::server3::headers_t       &response_headers,
         std::string                    &response,
-        boost::shared_ptr<http::server3::connection> const &conn)
+        std::shared_ptr<http::server3::connection> const &conn)
     {
-        DBG_SCOPE_MEM_FN;
-
         params_t params;
         decode_query_string(query_string, params);
 
@@ -104,7 +102,7 @@ class http_query_server : boost::noncopyable
         }
         else if ((param=params.find(string_t(2,"dl"))) != params.end())
         {
-            boost::shared_ptr<http::server3::request> req;
+            std::shared_ptr<http::server3::request> req;
             std::string const id(param->second.second,param->second.first);
 
             LOG_MEM << "Download request received for id=" << id;
@@ -193,7 +191,7 @@ class http_query_server : boost::noncopyable
             std::string const id(std::string(param->second.second,param->second.first));
             short pcent = 0;
             short error = 0;
-            boost::shared_ptr<http::server3::request> req;
+            std::shared_ptr<http::server3::request> req;
             short tries = 0;
             while (++tries <= 3  &&  !req.get())
             {
@@ -211,8 +209,6 @@ class http_query_server : boost::noncopyable
 
 #ifndef NDEBUG
             std::string const url = "http://localhost:8085/";
-#elif CENTRIX_SOFTWARE
-            std::string const url(" http://195.224.113.203/");
 #else
             std::string const url = "http://pyf.li/";
 #endif
@@ -251,8 +247,6 @@ class http_query_server : boost::noncopyable
 
     bool const get_cookie_value(char const *name, http::server3::headers_t const &request_headers, std::string &value)
     {
-        DBG_SCOPE_MEM_FN;
-
         std::string value_list;
         for (http::server3::headers_t::const_iterator it1=request_headers.begin(); it1!=request_headers.end(); ++it1)
         {
@@ -302,8 +296,6 @@ class http_query_server : boost::noncopyable
 
     void decode_query_string(std::string const &query_string, params_t &params)
     {
-        DBG_SCOPE_MEM_FN;
-
         assert(strnicmp(query_string.c_str(),"/?",2) == 0);
 
         char const *it  = query_string.c_str();
@@ -343,8 +335,6 @@ namespace {
 
 bool const initialise_sockets(void)
 {
-    DBG_SCOPE_FN;
-
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2,2), &wsaData);
     if (LOBYTE(wsaData.wVersion) != 2  ||  HIBYTE(wsaData.wVersion) != 2)
@@ -372,14 +362,13 @@ boost::function0<void> shutdown_httpd;
 
 BOOL WINAPI console_ctrl_handler(DWORD ctrl_type)
 {
-    DBG_SCOPE_FN;
-    
     switch (ctrl_type)
     {
         case CTRL_C_EVENT:
         case CTRL_BREAK_EVENT:
         case CTRL_CLOSE_EVENT:
         case CTRL_SHUTDOWN_EVENT:
+            std::cerr << "Shutdown signalled from keyboard...";
             LOG << "Shutdown signalled from keyboard...";
             shutdown_httpd();
             return TRUE;
@@ -391,13 +380,12 @@ BOOL WINAPI console_ctrl_handler(DWORD ctrl_type)
 
 void httpd(http::server3::http_query_callback http_query)
 {
-    DBG_SCOPE_FN;
-
     try
     {
-        // Initialise server
+        unsigned port = 8089;
+        LOG << "Listening on port " << port;
         char const * const doc_root = ".";
-        http::server3::server httpd("0.0.0.0", "8089", doc_root, 10, http_query);
+        http::server3::server httpd("0.0.0.0", std::to_string(port).c_str(), doc_root, 10, http_query);
 
         // Set console control handler to allow server to be stopped.
         shutdown_httpd = boost::bind(&http::server3::server::stop, &httpd);
@@ -416,7 +404,7 @@ void httpd(http::server3::http_query_callback http_query)
 
 logging logger("./logs");
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char *argv[])
 {
 #ifndef NDEBUG
 //    _CrtSetBreakAlloc(747);
@@ -424,9 +412,6 @@ int _tmain(int argc, _TCHAR* argv[])
 #endif
 
     LOG << "pyf.li server starting";
-#if CENTRIX_SOFTWARE
-    LOG << "pyf.li server licensed to Centrix Software";
-#endif
 
     if (argc == 2 && stricmp(argv[1],"/stdout") == 0)
     {
@@ -459,7 +444,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
     http::server3::request::clear_requests();
     logger.close();
-    LOG << "pyf.li server terminated.";
+    LOG << "pyf.li server terminated.\n\n";
 
 	return 0;
 }

@@ -25,7 +25,7 @@ request_handler::request_handler(const std::string& doc_root, http_query_callbac
 {
 }
 
-void request_handler::handle_request(boost::shared_ptr<request> const &req, reply &rep, boost::shared_ptr<connection> const &conn)
+void request_handler::handle_request(std::shared_ptr<request> const &req, reply &rep, std::shared_ptr<connection> const &conn)
 {
   // Decode url to path.
   std::string request_path;
