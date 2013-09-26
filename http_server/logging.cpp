@@ -14,7 +14,7 @@ struct logging::Data
 {
     Data() : running_(true) { }
     volatile bool           running_;
-    HANDLE                  file_;
+    std::ofstream           file_;
     boost::filesystem::path path_;
     boost::mutex            lock_;
     std::list<std::string>  lines_;
@@ -32,7 +32,6 @@ logging::logging(char const *path)
     data->line_count_ = 0;
     data->log_to_console_ = false;
 
-    data->file_ = INVALID_HANDLE_VALUE;
     this->new_file();
     data->thread_ = new boost::thread(boost::bind(&logging::flusher, this));
 }
@@ -40,7 +39,7 @@ logging::logging(char const *path)
 logging::~logging()
 {
     data->thread_->join();
-    CloseHandle(data->file_);
+    data->file_.close();
     delete data;
 }
 
@@ -51,8 +50,8 @@ void logging::log_to_console(void)
 
 void logging::new_file(void)
 {
-    if (data->file_ != INVALID_HANDLE_VALUE)
-        CloseHandle(data->file_);
+    if (data->file_.is_open())
+        data->file_.close();
 
     boost::filesystem::path path;
     for (int index=1; path.empty()  ||  (exists(path)  &&  file_size(path) > Data::max_lines*80); ++index)
@@ -62,11 +61,11 @@ void logging::new_file(void)
 
         path = data->path_ / builder.str();
     }
-    data->file_ = CreateFileA(path.string().c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (data->file_ == INVALID_HANDLE_VALUE)
-        std::cerr << "Unable to open log file " << path << "\n";
-    else
+    data->file_.open(path.string(), std::ios_base::app);
+    if (data->file_.is_open())
         std::cerr << "Logging to file " << path << "\n";
+    else
+        std::cerr << "Unable to open log file " << path << "\n";
 }
 
 void logging::flusher(void)
@@ -113,8 +112,8 @@ bool const logging::flush(bool use_lock)
 
     for (std::list<std::string>::const_iterator it=data->lines_.begin(); it!=data->lines_.end(); )
     {
-        DWORD written;
-        if (!WriteFile(data->file_, it->c_str(), it->length(), &written, NULL)  ||  written != it->length())
+        data->file_.write(it->c_str(), it->length());
+        if (data->file_.bad())
             return false;
 
         if (data->log_to_console_)
