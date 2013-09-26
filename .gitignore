@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+bin/Debug/*
+bin/Release/*
+*.user
+www/centrix/*

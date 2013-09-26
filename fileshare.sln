@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "http_server", "http_server\http_server.vcxproj", "{32D64B84-C96E-4BE9-8AB0-9237A22F74F9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fileshare", "fileshare\fileshare.vcxproj", "{00FD4565-7734-4B7F-AA20-09DD5EEA1F14}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32D64B84-C96E-4BE9-8AB0-9237A22F74F9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{32D64B84-C96E-4BE9-8AB0-9237A22F74F9}.Debug|Win32.Build.0 = Debug|Win32
+		{32D64B84-C96E-4BE9-8AB0-9237A22F74F9}.Release|Win32.ActiveCfg = Release|Win32
+		{32D64B84-C96E-4BE9-8AB0-9237A22F74F9}.Release|Win32.Build.0 = Release|Win32
+		{00FD4565-7734-4B7F-AA20-09DD5EEA1F14}.Debug|Win32.ActiveCfg = Debug|Win32
+		{00FD4565-7734-4B7F-AA20-09DD5EEA1F14}.Debug|Win32.Build.0 = Debug|Win32
+		{00FD4565-7734-4B7F-AA20-09DD5EEA1F14}.Release|Win32.ActiveCfg = Release|Win32
+		{00FD4565-7734-4B7F-AA20-09DD5EEA1F14}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

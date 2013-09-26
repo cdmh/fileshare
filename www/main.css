@@ -1,0 +1,221 @@
+body {
+font-family:Arial;
+}
+
+img {
+border:none;
+}
+
+a, a:visited {
+text-decoration:none;
+color:blue;
+}
+
+div#uploading,
+div#failed,
+div#download {
+display:none;
+}
+
+div#failed p,
+div#download p {
+font-size:12pt;
+}
+
+div#pcent {
+width:0%;
+background-color:#139731;
+padding:3px 0px 3px 0px;
+color:#baee88;
+margin:0px;
+overflow:visible;
+text-align:right;
+}
+
+div#pcent2,
+div#pbar {
+width:740px;
+border:solid 1px #139731;
+font-family:arial;
+font-size:18pt;
+border-radius:5px;
+-moz-border-radius:5px;
+}
+
+div#pbar {
+margin-top:30px;
+}
+
+div#progress {
+display:none;
+}
+
+h1, h2 {
+font-size:24px;
+color:#139731;
+font-style:italic;
+font-weight: bold;
+margin:0px;
+}
+
+h1 {
+margin-top:30px;
+}
+
+h1#lets_go {
+margin-top:15px;
+}
+
+h2 {
+margin-top:10px;
+}
+
+div#pcent2 {
+border:none;
+text-align:right;
+margin-top:10px;
+padding:0;
+font-family:Georgia;
+font-style:italic;
+}
+
+div#download_link {
+width:100%;
+margin-top:40px;
+text-align:left;
+font-size:12pt;
+}
+
+span#download_link a {
+margin-left:20px;
+margin-right:10px;
+}
+
+p.download_link {
+width:100%;
+text-align:center;
+}
+
+div.content {
+width:800px;
+margin-left:auto;
+margin-right:auto;
+}
+
+p#share_another {
+margin-top:60px;
+text-align:left;
+}
+
+p#share_another a {
+color:blue;
+font-size:150%;
+padding:5px;
+border:solid 2px blue;
+border-radius:5px;
+-moz-border-radius:5px;
+}
+
+div#DEBUG {
+color:red;
+display:none;
+}
+
+div.unavailable {
+border:solid 2px #ed7d29;
+border-radius:15px;
+-moz-border-radius:15px;
+width:75%;
+margin:10px auto 10px auto;
+background-color:#ed7d29;
+}
+
+div.unavailable p {
+font-size:12pt;
+text-align:center;
+color:#fff;
+}
+
+div#failed 
+{
+	margin-top:20px;
+}
+
+div.logo
+{
+	margin-top:25px;
+	text-align:center;
+}
+
+div.mainpanel 
+{
+	position:absolute;
+	top:72px;
+	width:740px;
+	height:415px;
+	padding:30px;
+	padding-top:50px;
+	z-index:-10;
+	border:solid 3px #ccc;
+
+	box-shadow: 3px 3px 3px #eee;
+	-moz-box-shadow: 3px 3px 3px #eee;
+	-webkit-box-shadow: 3px 3px 3px #eee;
+
+	border-radius:25px;
+	-moz-border-radius:25px;
+
+	/* http://www.colorzilla.com/gradient-editor/ */
+	background: #ffffff; /* old browsers */
+	background: -moz-linear-gradient(top, #ffffff 0%, #f6f6f6 47%, #ededed 100%); /* firefox */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(47%,#f6f6f6), color-stop(100%,#ededed)) fixed; /* webkit */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed',GradientType=0 ); /* ie */
+}
+
+div.footnote {
+top:570px;
+position:absolute;
+width:98%;
+}
+
+div.footnote p {
+font-size:9pt;
+text-align:center;
+color:#000;
+font-style:normal;
+}
+
+textarea {
+font-family:arial;
+font-size:14pt;
+}
+
+span#tweetlen {
+font-size:130%;
+color:#aaa;
+margin-left:15px;
+}
+
+span#tweetlen.toolong {
+color:red;
+}
+
+div.try_twitter {
+position:absolute;
+width:100%;
+top:455px;
+}
+
+div.twitter_detail {
+position:absolute;
+width:200px;
+right:0;
+top:110px;
+text-align:right;
+margin-right:100px;
+}
+
+div.try_twitter a,
+div.twitter_detail a {
+color:Blue;
+}
